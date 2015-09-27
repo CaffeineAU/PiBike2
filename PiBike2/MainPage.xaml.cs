@@ -22,14 +22,22 @@ namespace PiBike2
     /// </summary>
     public sealed partial class MainPage : Page
     {
+
+        C7ZL m_bike;
+
         public MainPage()
         {
             this.InitializeComponent();
+
+            m_bike = new C7ZL();
+
+            m_bike.HeartRateChanged += M_bike_HeartRateChanged;
+
         }
 
-        private void textBlock_SelectionChanged(object sender, RoutedEventArgs e)
+        private void M_bike_HeartRateChanged(object sender, EventArgs e)
         {
-
+            tbHeartRate.Text = m_bike.HeartRate.ToString();
         }
     }
 }

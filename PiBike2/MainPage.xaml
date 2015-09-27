@@ -8,7 +8,20 @@
     mc:Ignorable="d" Width="800" Height="480">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="39,27,0,0" TextWrapping="Wrap" Text="Hello World" VerticalAlignment="Top" SelectionChanged="textBlock_SelectionChanged"/>
+        
+        <Grid HorizontalAlignment="Left" Height="154" Margin="174,52,0,0" VerticalAlignment="Top" Width="261">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="51*"/>
+                <ColumnDefinition Width="49*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30*"/>
+                <RowDefinition Height="39*"/>
+                <RowDefinition Height="31*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" TextWrapping="Wrap" Text="Heart Rate:" VerticalAlignment="Top"/>
+            <TextBlock x:Name="tbHeartRate" Grid.Column="1" Grid.Row="0"  TextWrapping="Wrap" Text="Heart Rate Value" VerticalAlignment="Top"/>
+        </Grid>
 
     </Grid>
 </Page>
