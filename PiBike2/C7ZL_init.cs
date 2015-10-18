@@ -13,39 +13,42 @@ namespace PiBike2
     {
         GpioController m_gpio;
 
+        //Warning.  Microsoft reserved GPIO 17, 19, 20, and 21 for SPI1
+        //Do NOT use for GPIO
+
+
         //Digital Outputs
-        //BLUE LED - this wont work because it is the SPI1 CS0 port
-        private GpioPin m_pin_blue_led;
-        private const int BLUE_LED_PIN = 5;
+        private GpioPin m_pin_blue_led = null;
+        private const int BLUE_LED_PIN = 5;  //GPIO 5
         //RED LED
-        private GpioPin m_pin_red_led;
-        private const int RED_LED_PIN = 22;
+        private GpioPin m_pin_red_led = null;
+        private const int RED_LED_PIN = 22;  //GPIO 22
         //Motor 1A, 1B, En
-        private GpioPin m_pin_motor3A;
-        private const int MOTOR3A_PIN = 23;
-        private GpioPin m_pin_motor4A;
-        private const int MOTOR4A_PIN = 24;
-        private GpioPin m_pin_motor34EN;
-        private const int MOTOR34EN_PIN = 18;
+        private GpioPin m_pin_motor3A = null;
+        private const int MOTOR3A_PIN = 23; //GPIO 23
+        private GpioPin m_pin_motor4A = null;
+        private const int MOTOR4A_PIN = 24; //GPIO 24
+        private GpioPin m_pin_motor34EN = null;
+        private const int MOTOR34EN_PIN = 18; //GPIO 18
 
         //Cadence Sensor
         //Digital Inputs
-        //YellowButton - This wont work because it is the SPI0 SCLK pin
-        private GpioPin m_pin_yellow_button;
-        private const int YELLOW_BUTTON_PIN = 6;
-        //GreenButton - This wont work because it is the SPI0 MISO pin
-        private GpioPin m_pin_green_button;
-        private const int GREEN_BUTTON_PIN = 13;
-        //Heartrate Sensor - This wont work because it is the SPI1 SCLK pin
-        private GpioPin m_pin_heart_rate_sensor;
-        private const int HEART_RATE_SENSOR_PIN = 12;
+        //YellowButton
+        private GpioPin m_pin_yellow_button = null;
+        private const int YELLOW_BUTTON_PIN = 26; //GPIO 26
+        //GreenButton
+        private GpioPin m_pin_green_button = null;
+        private const int GREEN_BUTTON_PIN = 13;  //GPIO 13
+        //Heartrate Sensor
+        private GpioPin m_pin_heart_rate_sensor = null;
+        private const int HEART_RATE_SENSOR_PIN = 16; //GPIO 16
         //Cadence Sensor
-        private GpioPin m_pin_cadence_sensor;
-        private const int CADENCE_SENSOR_PIN = 27;
+        private GpioPin m_pin_cadence_sensor = null;
+        private const int CADENCE_SENSOR_PIN = 27;  //GPIO 27
 
 
         //Analog Inputs
-        //ADC - This uses i2c so do it last
+        //ADC - This uses SPI so do it last
 
         private const int BUTTON_DEBOUNCE = 50;
 
@@ -56,49 +59,45 @@ namespace PiBike2
             // Show an error if there is no GPIO controller
             if (m_gpio == null)
             {
-                m_pin_red_led = null;
-                m_pin_yellow_button = null;
                 throw new Exception("There is no GPIO controller on this device.");
             }
 
-            InitBlueLED();
-            InitRedLED();
-            InitYellowButton();
-            InitGreenButton();
+            m_pin_blue_led = InitLED(BLUE_LED_PIN, GpioPinValue.High);
+
+            m_pin_red_led = InitLED(RED_LED_PIN, GpioPinValue.High);
+
+            m_pin_yellow_button = InitButton(YELLOW_BUTTON_PIN);
+            m_pin_yellow_button.ValueChanged += M_pin_yellow_button_ValueChanged;
+
+            m_pin_green_button = InitButton(GREEN_BUTTON_PIN);
+            m_pin_green_button.ValueChanged += M_pin_green_button_ValueChanged;
+
+
             InitHeartRateSensor();
+
             InitMotor();
 
             InitADC();
 
 
         }
-        private void InitBlueLED()
+        private GpioPin InitLED(int pin_number, GpioPinValue pin_value)
         {
-            m_pin_blue_led = m_gpio.OpenPin(BLUE_LED_PIN);
+            GpioPin tmp = m_gpio.OpenPin(pin_number);
 
             // Show an error if the pin wasn't initialized properly
-            if (m_pin_blue_led == null)
+            if (tmp == null)
             {
-                throw new Exception("There were problems initializing the GPIO pin for the blue LED.");
+                throw new Exception(
+                    string.Format("There were problems initializing the GPIO pin {0}.", pin_number));
             }
 
-            m_pin_blue_led.Write(GpioPinValue.High);
-            m_pin_blue_led.SetDriveMode(GpioPinDriveMode.Output);
+            tmp.Write(pin_value);
+            tmp.SetDriveMode(GpioPinDriveMode.Output);
+
+            return tmp;
         }
 
-        private void InitRedLED()
-        {
-            m_pin_red_led = m_gpio.OpenPin(RED_LED_PIN);
-
-            // Show an error if the pin wasn't initialized properly
-            if (m_pin_red_led == null)
-            {
-                throw new Exception("There were problems initializing the GPIO pin for the red LED.");
-            }
-
-            m_pin_red_led.Write(GpioPinValue.High);
-            m_pin_red_led.SetDriveMode(GpioPinDriveMode.Output);
-        }
 
         private void InitMotor()
         {
@@ -124,47 +123,27 @@ namespace PiBike2
         }
 
 
-        private void InitYellowButton()
+        private GpioPin InitButton(int pin_number)
         {
-            m_pin_yellow_button = m_gpio.OpenPin(YELLOW_BUTTON_PIN);
+            GpioPin tmp = m_gpio.OpenPin(pin_number);
 
 
-            if (m_pin_yellow_button.IsDriveModeSupported(GpioPinDriveMode.InputPullUp))
+            if (tmp.IsDriveModeSupported(GpioPinDriveMode.InputPullUp))
             {
                 //change this if you get rid of the external pull up
-                m_pin_yellow_button.SetDriveMode(GpioPinDriveMode.Input);
+                tmp.SetDriveMode(GpioPinDriveMode.Input);
             }
             else
             {
-                m_pin_yellow_button.SetDriveMode(GpioPinDriveMode.Input);
+                tmp.SetDriveMode(GpioPinDriveMode.Input);
             }
 
-            m_pin_yellow_button.DebounceTimeout = TimeSpan.FromMilliseconds(BUTTON_DEBOUNCE);
-            m_pin_yellow_button.ValueChanged += M_pin_yellow_button_ValueChanged;
+            tmp.DebounceTimeout = TimeSpan.FromMilliseconds(BUTTON_DEBOUNCE);
+            
 
+            return tmp;
         }
 
-        
-
-        private void InitGreenButton()
-        {
-            m_pin_green_button = m_gpio.OpenPin(GREEN_BUTTON_PIN);
-
-
-            if (m_pin_green_button.IsDriveModeSupported(GpioPinDriveMode.InputPullUp))
-            {
-                //change this if you get rid of the external pull up
-                m_pin_green_button.SetDriveMode(GpioPinDriveMode.Input);
-            }
-            else
-            {
-                m_pin_green_button.SetDriveMode(GpioPinDriveMode.Input);
-            }
-
-            m_pin_green_button.DebounceTimeout = TimeSpan.FromMilliseconds(BUTTON_DEBOUNCE);
-            m_pin_green_button.ValueChanged += M_pin_green_button_ValueChanged;
-
-        }
 
         
 
