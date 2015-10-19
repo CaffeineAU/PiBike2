@@ -26,6 +26,8 @@ namespace PiBike2
 
         C7ZL m_bike;
 
+        DispatcherTimer timer;
+
         public MainPage()
         {
             this.InitializeComponent();
@@ -37,6 +39,16 @@ namespace PiBike2
             m_bike.GreenButtonPressed += M_bike_GreenButtonPressed;
             m_bike.YellowButtonPressed += M_bike_YellowButtonPressed;
 
+            timer = new DispatcherTimer();
+            timer.Interval = new TimeSpan(0,0,0,0,100);
+            timer.Tick += Timer_Tick;
+            timer.Start();
+
+        }
+
+        private void Timer_Tick(object sender, object e)
+        {
+            lblSPI.Text = m_bike.pot;
         }
 
         private void M_bike_YellowButtonPressed(object sender, EventArgs e)

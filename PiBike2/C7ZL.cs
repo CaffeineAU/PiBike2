@@ -62,6 +62,17 @@ namespace PiBike2
             }
         }
 
+        public string pot
+        {
+            get
+            {
+                //first 3 bits of the first byte are discarded
+                int a = ((ReadBuf[0] << 11) >> 3) + (ReadBuf[1]);
+
+                return string.Format("{0}", a);
+            }
+        }
+
     }
 
     

@@ -23,6 +23,7 @@
             <TextBlock x:Name="tbHeartRate" Grid.Column="1" Grid.Row="0"  TextWrapping="Wrap" Text="Heart Rate Value" VerticalAlignment="Top"/>
         </Grid>
         <TextBlock x:Name="lblCount" HorizontalAlignment="Left" Margin="435,225,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="55" Width="102"/>
+        <TextBlock x:Name="lblSPI" HorizontalAlignment="Left" Margin="435,333,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="47" Width="141"/>
 
     </Grid>
 </Page>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.Gpio;
@@ -49,8 +50,14 @@ namespace PiBike2
 
         //Analog Inputs
         //ADC - This uses SPI so do it last
+        SpiDevice spi_adc = null;
+        byte[] ReadBuf = new byte[2];
 
         private const int BUTTON_DEBOUNCE = 50;
+
+
+        Timer spi_timer;
+
 
         private void InitGPIO()
         {
@@ -79,8 +86,18 @@ namespace PiBike2
 
             InitADC();
 
+            
 
         }
+
+        private void TimerCallback(object state)
+        {
+
+            spi_adc.Read(ReadBuf);
+
+        }
+
+
         private GpioPin InitLED(int pin_number, GpioPinValue pin_value)
         {
             GpioPin tmp = m_gpio.OpenPin(pin_number);
@@ -196,26 +213,30 @@ namespace PiBike2
             //Data - SPI0 MISO
             //CS - SPI0 CS
 
-            try
-            {
-                var settings = new SpiConnectionSettings(0);
-                settings.ClockFrequency = 1600000;                              /* 1.6MHz is the rated speed                   */
-                settings.Mode = SpiMode.Mode3;                                  /* The accelerometer expects an idle-high clock polarity, we use Mode3    
+            var settings = new SpiConnectionSettings(0);
+            settings.ClockFrequency = 1600000;                              /* 1.6MHz is the rated speed                   */
+            settings.Mode = SpiMode.Mode0;                                  /* The accelerometer expects an idle-high clock polarity, we use Mode3    
                                                                          * to set the clock polarity and phase to: CPOL = 1, CPHA = 1         
                                                                          */
 
-                string aqs = SpiDevice.GetDeviceSelector();                     /* Get a selector string that will return all SPI controllers on the system */
-                var dis = await DeviceInformation.FindAllAsync(aqs);            /* Find the SPI bus controller devices with our selector string             */
-                SpiDevice SPIAccel = await SpiDevice.FromIdAsync(dis[0].Id, settings);    /* Create an SpiDevice with our bus controller and SPI settings             */
-                if (SPIAccel == null)
-                {
-                    throw new Exception(string.Format(
-                        "SPI Controller {0} is currently in use by " +
-                        "another application. Please ensure that no other applications are using SPI.",
-                        dis[0].Id));
-                }
+            string aqs = SpiDevice.GetDeviceSelector();                     /* Get a selector string that will return all SPI controllers on the system */
+            var dis = await DeviceInformation.FindAllAsync(aqs);            /* Find the SPI bus controller devices with our selector string             */
+            spi_adc = await SpiDevice.FromIdAsync(dis[0].Id, settings);    /* Create an SpiDevice with our bus controller and SPI settings             */
+            if (spi_adc == null)
+            {
+                throw new Exception(string.Format(
+                    "SPI Controller {0} is currently in use by " +
+                    "another application. Please ensure that no other applications are using SPI.",
+                    dis[0].Id));
             }
-            catch(Exception e) { }
+            else
+            {
+                spi_timer = new Timer(this.TimerCallback, null, 0, 100);
+            }
+
         }
+
+        
+
     }
 }

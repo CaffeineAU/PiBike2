@@ -14,6 +14,8 @@ namespace PiBike2
         public event EventHandler HeartRateChanged;
         public event EventHandler RpmChanged;
 
+        public event EventHandler ADCChanged;
+
         private DateTime m_last_hr = DateTime.Now;
         private DateTime m_last_cadence = DateTime.Now;
 
@@ -60,7 +62,7 @@ namespace PiBike2
 
         }
 
-        
+
 
         private void M_pin_heart_rate_sensor_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs args)
         {
@@ -87,7 +89,7 @@ namespace PiBike2
 
         }
 
-        
+
 
         private void M_pin_cadence_sensor_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs args)
         {
