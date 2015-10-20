@@ -26,7 +26,7 @@ namespace PiBike2
 
         C7ZL m_bike;
 
-        DispatcherTimer timer;
+        DispatcherTimer ui_update_timer;
 
         public MainPage()
         {
@@ -35,36 +35,32 @@ namespace PiBike2
             m_bike = new C7ZL();
 
             m_bike.HeartRateChanged += M_bike_HeartRateChanged;
-
             m_bike.GreenButtonPressed += M_bike_GreenButtonPressed;
             m_bike.YellowButtonPressed += M_bike_YellowButtonPressed;
 
-            timer = new DispatcherTimer();
-            timer.Interval = new TimeSpan(0,0,0,0,100);
-            timer.Tick += Timer_Tick;
-            timer.Start();
+            ui_update_timer = new DispatcherTimer();
+            ui_update_timer.Interval = new TimeSpan(0,0,0,0,100);
+            ui_update_timer.Tick += Timer_Tick;
+            ui_update_timer.Start();
 
         }
 
         private void Timer_Tick(object sender, object e)
         {
-            lblSPI.Text = m_bike.pot;
+            lblDifficulty.Text = m_bike.Difficulty.ToString();
         }
 
         private void M_bike_YellowButtonPressed(object sender, EventArgs e)
         {
             var task = Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => {
-                lblCount.Text = (count+=10).ToString();
-
+                SetDifficulty(m_bike.Difficulty + 5);
             });
         }
-
-        int count = 0;
 
         private void M_bike_GreenButtonPressed(object sender, EventArgs e)
         {
             var task = Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => {
-                lblCount.Text = (count++).ToString();
+                SetDifficulty(m_bike.Difficulty - 5);
             });
         }
 
@@ -73,6 +69,30 @@ namespace PiBike2
             var task = Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => {
                 tbHeartRate.Text = m_bike.HeartRate.ToString();
             });
+        }
+
+        private void btnUp_Click(object sender, RoutedEventArgs e)
+        {
+            SetDifficulty(m_bike.Difficulty + 5);
+        }
+
+        private void btnDown_Click(object sender, RoutedEventArgs e)
+        {
+            SetDifficulty(m_bike.Difficulty - 5);
+        }
+
+
+        private void SetDifficulty(int value)
+        {
+            try
+            {
+                m_bike.Difficulty = value;
+            }
+            catch(Exception e)
+            {
+                lblError.Text = string.Format("{0} {1}", DateTime.Now, e.Message);
+            }
+
         }
     }
 }

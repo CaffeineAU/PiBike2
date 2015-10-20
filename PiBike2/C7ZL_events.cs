@@ -14,8 +14,6 @@ namespace PiBike2
         public event EventHandler HeartRateChanged;
         public event EventHandler RpmChanged;
 
-        public event EventHandler ADCChanged;
-
         private DateTime m_last_hr = DateTime.Now;
         private DateTime m_last_cadence = DateTime.Now;
 
@@ -23,44 +21,20 @@ namespace PiBike2
 
         private void M_pin_yellow_button_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs args)
         {
-            if (YellowButtonPressed != null)
+            if ((args.Edge == GpioPinEdge.FallingEdge) && (YellowButtonPressed != null))
             {
                 YellowButtonPressed(this, null);
-                ToggleLEDSTest();
             }
         }
 
         private void M_pin_green_button_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs args)
         {
-            if (GreenButtonPressed != null)
+            if ((args.Edge == GpioPinEdge.FallingEdge) && (GreenButtonPressed != null))
             {
                 GreenButtonPressed(this, null);
-                ToggleLEDSTest();
             }
         }
 
-        private void ToggleLEDSTest()
-        {
-            if (m_pin_red_led.Read() == GpioPinValue.Low)
-            {
-                m_pin_red_led.Write(GpioPinValue.High);
-            }
-            else
-            {
-                m_pin_red_led.Write(GpioPinValue.Low);
-            }
-
-            if (m_pin_blue_led.Read() == GpioPinValue.Low)
-            {
-                m_pin_blue_led.Write(GpioPinValue.High);
-            }
-            else
-            {
-                m_pin_blue_led.Write(GpioPinValue.Low);
-            }
-
-
-        }
 
 
 

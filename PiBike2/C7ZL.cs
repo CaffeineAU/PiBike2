@@ -40,11 +40,11 @@ namespace PiBike2
         }
 
 
-        private int m_difficulty;
+        private int m_difficulty_setpoint;
 
         public int Difficulty
         {
-            get { return m_difficulty; }
+            get { return m_difficulty_setpoint; }
             set
             {
                 if (value < 0)
@@ -57,21 +57,12 @@ namespace PiBike2
                 }
                 else
                 {
-                    m_difficulty = value;
+                    m_difficulty_setpoint = value;
                 }
             }
         }
 
-        public string pot
-        {
-            get
-            {
-                //first 3 bits of the first byte are discarded
-                int a = ((ReadBuf[0] << 11) >> 3) + (ReadBuf[1]);
-
-                return string.Format("{0}", a);
-            }
-        }
+        
 
     }
 

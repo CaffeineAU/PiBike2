@@ -8,8 +8,8 @@
     mc:Ignorable="d" Width="800" Height="480">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        
-        <Grid HorizontalAlignment="Left" Height="154" Margin="174,52,0,0" VerticalAlignment="Top" Width="261">
+
+        <Grid HorizontalAlignment="Left" Height="154" Margin="17,30,0,0" VerticalAlignment="Top" Width="261">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="51*"/>
                 <ColumnDefinition Width="49*"/>
@@ -22,8 +22,12 @@
             <TextBlock Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" TextWrapping="Wrap" Text="Heart Rate:" VerticalAlignment="Top"/>
             <TextBlock x:Name="tbHeartRate" Grid.Column="1" Grid.Row="0"  TextWrapping="Wrap" Text="Heart Rate Value" VerticalAlignment="Top"/>
         </Grid>
-        <TextBlock x:Name="lblCount" HorizontalAlignment="Left" Margin="435,225,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="55" Width="102"/>
-        <TextBlock x:Name="lblSPI" HorizontalAlignment="Left" Margin="435,333,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="47" Width="141"/>
+        <TextBlock x:Name="lblCount" HorizontalAlignment="Left" Margin="57,189,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="55" Width="102"/>
+        <TextBlock x:Name="lblSPI" HorizontalAlignment="Left" Margin="164,197,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="47" Width="141"/>
+        <Button x:Name="btnUp" Content="+" HorizontalAlignment="Left" Margin="620,101,0,0" VerticalAlignment="Top" Height="91" Width="100" Click="btnUp_Click"/>
+        <Button x:Name="btnDown" Content="-" HorizontalAlignment="Left" Margin="620,219,0,0" VerticalAlignment="Top" Height="96" Width="100" Click="btnDown_Click"/>
+        <TextBlock x:Name="lblDifficulty" HorizontalAlignment="Left" Margin="640,197,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" RenderTransformOrigin="3.275,0.62"/>
+        <TextBlock x:Name="lblError" HorizontalAlignment="Left" Margin="17,450,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="20" Width="773"/>
 
     </Grid>
 </Page>

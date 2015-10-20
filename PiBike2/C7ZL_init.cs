@@ -56,7 +56,7 @@ namespace PiBike2
         private const int BUTTON_DEBOUNCE = 50;
 
 
-        Timer spi_timer;
+        
 
 
         private void InitGPIO()
@@ -90,13 +90,7 @@ namespace PiBike2
 
         }
 
-        private void TimerCallback(object state)
-        {
-
-            spi_adc.Read(ReadBuf);
-
-        }
-
+        
 
         private GpioPin InitLED(int pin_number, GpioPinValue pin_value)
         {

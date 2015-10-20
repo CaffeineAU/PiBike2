@@ -100,6 +100,7 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="C7ZL.cs" />
+    <Compile Include="C7ZL_control.cs" />
     <Compile Include="C7ZL_events.cs" />
     <Compile Include="C7ZL_init.cs" />
     <Compile Include="MainPage.xaml.cs">
