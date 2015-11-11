@@ -8,26 +8,34 @@
     mc:Ignorable="d" Width="800" Height="480">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
-        <Grid HorizontalAlignment="Left" Height="154" Margin="17,30,0,0" VerticalAlignment="Top" Width="261">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="51*"/>
-                <ColumnDefinition Width="49*"/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="30*"/>
-                <RowDefinition Height="39*"/>
-                <RowDefinition Height="31*"/>
-            </Grid.RowDefinitions>
-            <TextBlock Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" TextWrapping="Wrap" Text="Heart Rate:" VerticalAlignment="Top"/>
-            <TextBlock x:Name="tbHeartRate" Grid.Column="1" Grid.Row="0"  TextWrapping="Wrap" Text="Heart Rate Value" VerticalAlignment="Top"/>
-        </Grid>
-        <TextBlock x:Name="lblCount" HorizontalAlignment="Left" Margin="57,189,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="55" Width="102"/>
-        <TextBlock x:Name="lblSPI" HorizontalAlignment="Left" Margin="164,197,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="47" Width="141"/>
         <Button x:Name="btnUp" Content="+" HorizontalAlignment="Left" Margin="620,101,0,0" VerticalAlignment="Top" Height="91" Width="100" Click="btnUp_Click"/>
         <Button x:Name="btnDown" Content="-" HorizontalAlignment="Left" Margin="620,219,0,0" VerticalAlignment="Top" Height="96" Width="100" Click="btnDown_Click"/>
-        <TextBlock x:Name="lblDifficulty" HorizontalAlignment="Left" Margin="640,197,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" RenderTransformOrigin="3.275,0.62"/>
-        <TextBlock x:Name="lblError" HorizontalAlignment="Left" Margin="17,450,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="20" Width="773"/>
+        <TextBlock x:Name="lblError" HorizontalAlignment="Left" Margin="17,450,0,0" TextWrapping="Wrap" Text="Error Text Block" VerticalAlignment="Top" Height="20" Width="773"/>
+        <Grid Margin="69,65,372,134" BorderThickness="1" BorderBrush="Black">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <TextBlock  Grid.Column="0" Grid.Row="0" x:Name="tbRPM_label" TextWrapping="Wrap" Text="tbRPM_label"/>
+            <TextBlock  Grid.Column="1" Grid.Row="0" x:Name="tbRPM_value" TextWrapping="Wrap" Text="tbRPM_value"/>
+
+            <TextBlock  Grid.Column="0" Grid.Row="1" x:Name="tbHR_label" TextWrapping="Wrap" Text="Heart Rate"/>
+            <TextBlock  Grid.Column="1" Grid.Row="1" x:Name="tbHR_value" TextWrapping="Wrap" Text="tbHR_value" />
+
+            <TextBlock  Grid.Column="0" Grid.Row="2" x:Name="tbADC_label" TextWrapping="Wrap" Text="ADC Value" />
+            <TextBlock  Grid.Column="1" Grid.Row="2" x:Name="tbADC_value" TextWrapping="Wrap" Text="tbADC_value"/>
+
+            <TextBlock  Grid.Column="0" Grid.Row="3" x:Name="tbDifficulty_label" TextWrapping="Wrap" Text="Difficulty" />
+            <TextBlock  Grid.Column="1" Grid.Row="3" x:Name="tbDifficulty_value" TextWrapping="Wrap" Text="tbDifficulty_value" />
+            
+        </Grid>
+        <Button x:Name="btnOff" Content="Off" HorizontalAlignment="Left" Margin="620,414,0,0" VerticalAlignment="Top" Height="36" Width="125" Click="btnOff_Click"/>
 
     </Grid>
 </Page>

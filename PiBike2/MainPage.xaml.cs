@@ -13,6 +13,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Windows.System;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -47,7 +48,7 @@ namespace PiBike2
 
         private void Timer_Tick(object sender, object e)
         {
-            lblDifficulty.Text = m_bike.Difficulty.ToString();
+            tbDifficulty_value.Text = m_bike.Difficulty.ToString();
         }
 
         private void M_bike_YellowButtonPressed(object sender, EventArgs e)
@@ -67,7 +68,7 @@ namespace PiBike2
         private void M_bike_HeartRateChanged(object sender, EventArgs e)
         {
             var task = Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => {
-                tbHeartRate.Text = m_bike.HeartRate.ToString();
+                tbHR_value.Text = m_bike.HeartRate.ToString();
             });
         }
 
@@ -94,5 +95,11 @@ namespace PiBike2
             }
 
         }
+
+        private void btnOff_Click(object sender, RoutedEventArgs e)
+        {
+            ShutdownManager.BeginShutdown(ShutdownKind.Shutdown, new TimeSpan(0));
+        }
+
     }
 }
