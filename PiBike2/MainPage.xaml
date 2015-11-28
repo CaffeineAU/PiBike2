@@ -8,8 +8,8 @@
     mc:Ignorable="d" Width="800" Height="480">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <Button x:Name="btnUp" Content="+" HorizontalAlignment="Left" Margin="620,101,0,0" VerticalAlignment="Top" Height="91" Width="100" Click="btnUp_Click"/>
-        <Button x:Name="btnDown" Content="-" HorizontalAlignment="Left" Margin="620,219,0,0" VerticalAlignment="Top" Height="96" Width="100" Click="btnDown_Click"/>
+        <Button x:Name="btnUp" Content="Up" HorizontalAlignment="Left" Margin="620,101,0,0" VerticalAlignment="Top" Height="91" Width="100" Click="btnUp_Click" Background="#FFF2FD00"/>
+        <Button x:Name="btnDown" Content="Down" HorizontalAlignment="Left" Margin="620,219,0,0" VerticalAlignment="Top" Height="96" Width="100" Click="btnDown_Click" Background="#FF168516"/>
         <TextBlock x:Name="lblError" HorizontalAlignment="Left" Margin="17,450,0,0" TextWrapping="Wrap" Text="Error Text Block" VerticalAlignment="Top" Height="20" Width="773"/>
         <Grid Margin="69,65,372,134" BorderThickness="1" BorderBrush="Black">
             <Grid.ColumnDefinitions>

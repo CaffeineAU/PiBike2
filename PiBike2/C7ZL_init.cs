@@ -79,7 +79,7 @@ namespace PiBike2
             m_pin_green_button = InitButton(GREEN_BUTTON_PIN);
             m_pin_green_button.ValueChanged += M_pin_green_button_ValueChanged;
 
-
+            InitCadenceSensor();
             InitHeartRateSensor();
 
             InitMotor();
@@ -174,7 +174,7 @@ namespace PiBike2
                 m_pin_heart_rate_sensor.SetDriveMode(GpioPinDriveMode.Input);
             }
 
-            m_pin_heart_rate_sensor.DebounceTimeout = TimeSpan.FromMilliseconds(BUTTON_DEBOUNCE);
+            m_pin_heart_rate_sensor.DebounceTimeout = TimeSpan.FromMilliseconds(0);
             m_pin_heart_rate_sensor.ValueChanged += M_pin_heart_rate_sensor_ValueChanged;
 
         }
