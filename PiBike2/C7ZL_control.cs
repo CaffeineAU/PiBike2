@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -18,8 +19,34 @@ namespace PiBike2
 
         public string control_state = string.Empty;
 
+        private int toInt(GpioPinValue val)
+        {
+            if(val == GpioPinValue.High)
+            {
+                return 1;
+            }
+            return 0;
+        }
+
         private void TimerCallback(object state)
         {
+
+
+            int val = toInt(m_pin_wheel_1.Read()) + (toInt(m_pin_wheel_1.Read()) * 2);
+
+            Debug.WriteLine("{0}", val);
+            if(val == 1)
+            {
+                Debug.WriteLine("Left");
+            }
+            else if(val == 2)
+            {
+                Debug.WriteLine("Right");
+            }
+
+
+
+
             //read from the SPI device
             spi_adc.Read(ReadBuf);
 

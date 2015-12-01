@@ -34,12 +34,15 @@ namespace PiBike2
 
         //Cadence Sensor
         //Digital Inputs
-        //YellowButton
-        private GpioPin m_pin_yellow_button = null;
-        private const int YELLOW_BUTTON_PIN = 26; //GPIO 26
-        //GreenButton
-        private GpioPin m_pin_green_button = null;
-        private const int GREEN_BUTTON_PIN = 13;  //GPIO 13
+        //wheel buttons
+        private GpioPin m_pin_wheel_1 = null;
+        private const int WHEEL_1 = 26; //GPIO 26
+        private GpioPin m_pin_wheel_2 = null;
+        private const int WHEEL_2 = 13;  //GPIO 13
+        private GpioPin m_pin_wheel_3 = null;
+        private const int WHEEL_3 = 6;  //GPIO 6
+
+
         //Heartrate Sensor
         private GpioPin m_pin_heart_rate_sensor = null;
         private const int HEART_RATE_SENSOR_PIN = 16; //GPIO 16
@@ -53,7 +56,7 @@ namespace PiBike2
         SpiDevice spi_adc = null;
         byte[] ReadBuf = new byte[2];
 
-        private const int BUTTON_DEBOUNCE = 50;
+        private const int BUTTON_DEBOUNCE = 100;
 
 
         
@@ -73,11 +76,14 @@ namespace PiBike2
 
             m_pin_red_led = InitLED(RED_LED_PIN, GpioPinValue.High);
 
-            m_pin_yellow_button = InitButton(YELLOW_BUTTON_PIN);
-            m_pin_yellow_button.ValueChanged += M_pin_yellow_button_ValueChanged;
+            m_pin_wheel_1 = InitButton(WHEEL_1);
+            //m_pin_wheel_1.ValueChanged += M_pin_wheel_1_ValueChanged;
 
-            m_pin_green_button = InitButton(GREEN_BUTTON_PIN);
-            m_pin_green_button.ValueChanged += M_pin_green_button_ValueChanged;
+            m_pin_wheel_2 = InitButton(WHEEL_2);
+            //m_pin_wheel_2.ValueChanged += M_pin_wheel_2_ValueChanged;
+
+            m_pin_wheel_3 = InitButton(WHEEL_3);
+            m_pin_wheel_3.ValueChanged += M_pin_wheel_3_ValueChanged;
 
             InitCadenceSensor();
             InitHeartRateSensor();
@@ -142,7 +148,7 @@ namespace PiBike2
             if (tmp.IsDriveModeSupported(GpioPinDriveMode.InputPullUp))
             {
                 //change this if you get rid of the external pull up
-                tmp.SetDriveMode(GpioPinDriveMode.Input);
+                tmp.SetDriveMode(GpioPinDriveMode.InputPullUp);
             }
             else
             {
@@ -225,7 +231,7 @@ namespace PiBike2
             }
             else
             {
-                spi_timer = new Timer(this.TimerCallback, null, 0, 100);
+                spi_timer = new Timer(this.TimerCallback, null, 0, 10);
             }
 
         }

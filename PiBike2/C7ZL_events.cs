@@ -20,23 +20,38 @@ namespace PiBike2
 
 
 
-        private void M_pin_yellow_button_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs args)
+        private void M_pin_wheel_1_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs args)
         {
-            if ((args.Edge == GpioPinEdge.FallingEdge) && (YellowButtonPressed != null))
+
+            if (args.Edge == GpioPinEdge.FallingEdge)
             {
-                YellowButtonPressed(this, null);
+                if (m_pin_wheel_2.Read() == GpioPinValue.High)
+                {
+                    Debug.WriteLine("Left");
+                }
+                else
+                {
+                    Debug.WriteLine("Right");
+                }
             }
+
         }
 
-        private void M_pin_green_button_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs args)
+        private void M_pin_wheel_2_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs args)
         {
-            if ((args.Edge == GpioPinEdge.FallingEdge) && (GreenButtonPressed != null))
-            {
-                GreenButtonPressed(this, null);
-            }
         }
 
-
+        private void M_pin_wheel_3_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs args)
+        {
+            if (args.Edge == GpioPinEdge.RisingEdge)
+            {
+                Debug.WriteLine("Button Released");
+            }
+            else
+            {
+                Debug.WriteLine("Button Pressed");
+            }
+        }
 
 
         private void M_pin_heart_rate_sensor_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs args)
