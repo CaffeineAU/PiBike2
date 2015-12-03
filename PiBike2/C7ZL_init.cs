@@ -23,7 +23,7 @@ namespace PiBike2
         private const int BLUE_LED_PIN = 5;  //GPIO 5
         //RED LED
         private GpioPin m_pin_red_led = null;
-        private const int RED_LED_PIN = 22;  //GPIO 22
+        private const int RED_LED_PIN = 25;  //GPIO 22 for old board, 25 on new
         //Motor 1A, 1B, En
         private GpioPin m_pin_motor3A = null;
         private const int MOTOR3A_PIN = 23; //GPIO 23

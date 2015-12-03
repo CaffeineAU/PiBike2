@@ -28,21 +28,43 @@ namespace PiBike2
             return 0;
         }
 
+
+        private int[] buff = new int[5];
+
         private void TimerCallback(object state)
         {
 
 
-            int val = toInt(m_pin_wheel_1.Read()) + (toInt(m_pin_wheel_1.Read()) * 2);
+            int val = toInt(m_pin_wheel_1.Read()) + (toInt(m_pin_wheel_2.Read()) * 2);
 
-            Debug.WriteLine("{0}", val);
-            if(val == 1)
+            if(buff[4] != val)
             {
-                Debug.WriteLine("Left");
+                buff[0] = buff[1];
+                buff[1] = buff[2];
+                buff[2] = buff[3];
+                buff[3] = buff[4];
+                buff[4] = val;
+
+                if(buff[0] == 3 &&
+                    buff[1] == 1 &&
+                    buff[2] == 0 &&
+                    buff[3] == 2 &&
+                    buff[4] == 3)
+                {
+                    Debug.WriteLine("Left");
+                }
+                else if(buff[0] == 3 &&
+                    buff[1] == 2 &&
+                    buff[2] == 0 &&
+                    buff[3] == 1 &&
+                    buff[4] == 3)
+                {
+                    Debug.WriteLine("Right");
+                }
+
             }
-            else if(val == 2)
-            {
-                Debug.WriteLine("Right");
-            }
+
+            //Debug.WriteLine("{0},{1},{2},{3},{4}", buff[0], buff[1], buff[2], buff[3], buff[4]);
 
 
 
