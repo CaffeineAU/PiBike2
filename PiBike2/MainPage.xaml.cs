@@ -35,10 +35,10 @@ namespace PiBike2
 
             m_bike = new C7ZL();
 
+            m_bike.iFitLED = C7ZL.OnOff.On;
+
             m_bike.HeartRateChanged += M_bike_HeartRateChanged;
             m_bike.RpmChanged += M_bike_RpmChanged;
-            m_bike.GreenButtonPressed += M_bike_GreenButtonPressed;
-            m_bike.YellowButtonPressed += M_bike_YellowButtonPressed;
 
             ui_update_timer = new DispatcherTimer();
             ui_update_timer.Interval = new TimeSpan(0,0,0,0,100);
@@ -48,9 +48,33 @@ namespace PiBike2
 
             m_bike.Difficulty = 1;
 
+            m_bike.DialClickedClockwise += M_bike_DialClickedClockwise;
+            m_bike.DialClickedAnticlockwise += M_bike_DialClickedAnticlockwise;
+
+            m_bike.ButtonUpPressed += M_bike_ButtonUpPressed;
+            m_bike.ButtonDownPressed += M_bike_ButtonDownPressed;
+
         }
 
-        
+        private void M_bike_ButtonDownPressed(object sender, EventArgs e)
+        {
+            m_bike.Difficulty--;
+        }
+
+        private void M_bike_ButtonUpPressed(object sender, EventArgs e)
+        {
+           m_bike.Difficulty++;
+        }
+
+        private void M_bike_DialClickedAnticlockwise(object sender, EventArgs e)
+        {
+            m_bike.Difficulty--;
+        }
+
+        private void M_bike_DialClickedClockwise(object sender, EventArgs e)
+        {
+            m_bike.Difficulty++;
+        }
 
         private void M_bike_RpmChanged(object sender, EventArgs e)
         {
@@ -115,6 +139,9 @@ namespace PiBike2
 
         private void btnOff_Click(object sender, RoutedEventArgs e)
         {
+
+            m_bike.iFitLED = C7ZL.OnOff.Off;
+
             ShutdownManager.BeginShutdown(ShutdownKind.Shutdown, new TimeSpan(0));
         }
 

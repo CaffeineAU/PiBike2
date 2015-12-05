@@ -14,41 +14,44 @@ namespace PiBike2
     {
         GpioController m_gpio;
 
+        //GPIO Numbers
         //Warning.  Microsoft reserved GPIO 17, 19, 20, and 21 for SPI1
         //Do NOT use for GPIO
+        private const int BUTTON_UP = 5;
+        private const int WHEEL_3 = 6;
+        private const int BUTTON_DOWN = 12;
+        private const int WHEEL_2 = 26;
+        private const int HEART_RATE_SENSOR_PIN = 16;
+        //DO NOT USE 17
+        private const int MOTOR34EN_PIN = 18;
+        //DO NOT USE 19
+        //DO NOT USE 20
+        //DO NOT USE 21
+        private const int MOTOR3A_PIN = 23;
+        private const int MOTOR4A_PIN = 24;
+        private const int IFIT_LED_PIN = 25; 
+        private const int WHEEL_1 = 13; 
+        private const int CADENCE_SENSOR_PIN = 27;  
+
+
 
 
         //Digital Outputs
-        private GpioPin m_pin_blue_led = null;
-        private const int BLUE_LED_PIN = 5;  //GPIO 5
         //RED LED
-        private GpioPin m_pin_red_led = null;
-        private const int RED_LED_PIN = 25;  //GPIO 22 for old board, 25 on new
-        //Motor 1A, 1B, En
-        private GpioPin m_pin_motor3A = null;
-        private const int MOTOR3A_PIN = 23; //GPIO 23
-        private GpioPin m_pin_motor4A = null;
-        private const int MOTOR4A_PIN = 24; //GPIO 24
-        private GpioPin m_pin_motor34EN = null;
-        private const int MOTOR34EN_PIN = 18; //GPIO 18
-
-        //Cadence Sensor
+        private GpioPin m_ifit_led = null;
+        private GpioPin m_motor3A = null;
+        private GpioPin m_motor4A = null;
+        private GpioPin m_motor34EN = null;
+        
         //Digital Inputs
-        //wheel buttons
-        private GpioPin m_pin_wheel_1 = null;
-        private const int WHEEL_1 = 26; //GPIO 26
-        private GpioPin m_pin_wheel_2 = null;
-        private const int WHEEL_2 = 13;  //GPIO 13
-        private GpioPin m_pin_wheel_3 = null;
-        private const int WHEEL_3 = 6;  //GPIO 6
-
-
-        //Heartrate Sensor
-        private GpioPin m_pin_heart_rate_sensor = null;
-        private const int HEART_RATE_SENSOR_PIN = 16; //GPIO 16
-        //Cadence Sensor
-        private GpioPin m_pin_cadence_sensor = null;
-        private const int CADENCE_SENSOR_PIN = 27;  //GPIO 27
+        private GpioPin m_wheel_1 = null;
+        private GpioPin m_wheel_2 = null;
+        private GpioPin m_wheel_3 = null;
+        private GpioPin m_button_up = null;
+        private GpioPin m_button_down = null;
+        private GpioPin m_heart_rate_sensor = null;
+        private GpioPin m_cadence_sensor = null;
+        
 
 
         //Analog Inputs
@@ -57,7 +60,6 @@ namespace PiBike2
         byte[] ReadBuf = new byte[2];
 
         private const int BUTTON_DEBOUNCE = 100;
-
 
         
 
@@ -72,18 +74,24 @@ namespace PiBike2
                 throw new Exception("There is no GPIO controller on this device.");
             }
 
-            m_pin_blue_led = InitLED(BLUE_LED_PIN, GpioPinValue.High);
 
-            m_pin_red_led = InitLED(RED_LED_PIN, GpioPinValue.High);
+            m_ifit_led = InitLED(IFIT_LED_PIN, GpioPinValue.High);
 
-            m_pin_wheel_1 = InitButton(WHEEL_1);
-            //m_pin_wheel_1.ValueChanged += M_pin_wheel_1_ValueChanged;
+            //wheel 1 and 2 are the encoder inputs so do not link to an event, use polling to get the speed needed
+            m_wheel_1 = InitButton(WHEEL_1);
+            m_wheel_2 = InitButton(WHEEL_2);
+            dial_poll_timer = new Timer(this.DialPollCallback, null, 0, 1);
 
-            m_pin_wheel_2 = InitButton(WHEEL_2);
-            //m_pin_wheel_2.ValueChanged += M_pin_wheel_2_ValueChanged;
 
-            m_pin_wheel_3 = InitButton(WHEEL_3);
-            m_pin_wheel_3.ValueChanged += M_pin_wheel_3_ValueChanged;
+            m_wheel_3 = InitButton(WHEEL_3);
+            m_wheel_3.ValueChanged += M_wheel_3_ValueChanged;
+
+
+            m_button_down = InitButton(BUTTON_DOWN);
+            m_button_down.ValueChanged += M_button_down_ValueChanged;
+
+            m_button_up = InitButton(BUTTON_UP);
+            m_button_up.ValueChanged += M_button_up_ValueChanged;
 
             InitCadenceSensor();
             InitHeartRateSensor();
@@ -96,7 +104,6 @@ namespace PiBike2
 
         }
 
-        
 
         private GpioPin InitLED(int pin_number, GpioPinValue pin_value)
         {
@@ -118,24 +125,24 @@ namespace PiBike2
 
         private void InitMotor()
         {
-            m_pin_motor3A = m_gpio.OpenPin(MOTOR3A_PIN);
-            m_pin_motor4A = m_gpio.OpenPin(MOTOR4A_PIN);
-            m_pin_motor34EN = m_gpio.OpenPin(MOTOR34EN_PIN);
+            m_motor3A = m_gpio.OpenPin(MOTOR3A_PIN);
+            m_motor4A = m_gpio.OpenPin(MOTOR4A_PIN);
+            m_motor34EN = m_gpio.OpenPin(MOTOR34EN_PIN);
 
-            if (m_pin_motor3A == null ||
-                m_pin_motor4A == null ||
-                m_pin_motor34EN == null)
+            if (m_motor3A == null ||
+                m_motor4A == null ||
+                m_motor34EN == null)
             {
                 throw new Exception("There were problems initializing the GPIO pins for the motor.");
             }
 
 
-            m_pin_motor3A.Write(GpioPinValue.Low);
-            m_pin_motor4A.Write(GpioPinValue.Low);
-            m_pin_motor34EN.Write(GpioPinValue.Low);
-            m_pin_motor3A.SetDriveMode(GpioPinDriveMode.Output);
-            m_pin_motor4A.SetDriveMode(GpioPinDriveMode.Output);
-            m_pin_motor34EN.SetDriveMode(GpioPinDriveMode.Output);
+            m_motor3A.Write(GpioPinValue.Low);
+            m_motor4A.Write(GpioPinValue.Low);
+            m_motor34EN.Write(GpioPinValue.Low);
+            m_motor3A.SetDriveMode(GpioPinDriveMode.Output);
+            m_motor4A.SetDriveMode(GpioPinDriveMode.Output);
+            m_motor34EN.SetDriveMode(GpioPinDriveMode.Output);
 
         }
 
@@ -167,21 +174,21 @@ namespace PiBike2
 
         private void InitHeartRateSensor()
         {
-            m_pin_heart_rate_sensor = m_gpio.OpenPin(HEART_RATE_SENSOR_PIN);
+            m_heart_rate_sensor = m_gpio.OpenPin(HEART_RATE_SENSOR_PIN);
 
 
-            if (m_pin_heart_rate_sensor.IsDriveModeSupported(GpioPinDriveMode.InputPullUp))
+            if (m_heart_rate_sensor.IsDriveModeSupported(GpioPinDriveMode.InputPullUp))
             {
                 //change this if you get rid of the external pull up
-                m_pin_heart_rate_sensor.SetDriveMode(GpioPinDriveMode.Input);
+                m_heart_rate_sensor.SetDriveMode(GpioPinDriveMode.Input);
             }
             else
             {
-                m_pin_heart_rate_sensor.SetDriveMode(GpioPinDriveMode.Input);
+                m_heart_rate_sensor.SetDriveMode(GpioPinDriveMode.Input);
             }
 
-            m_pin_heart_rate_sensor.DebounceTimeout = TimeSpan.FromMilliseconds(0);
-            m_pin_heart_rate_sensor.ValueChanged += M_pin_heart_rate_sensor_ValueChanged;
+            m_heart_rate_sensor.DebounceTimeout = TimeSpan.FromMilliseconds(0);
+            m_heart_rate_sensor.ValueChanged += M_heart_rate_sensor_ValueChanged;
 
         }
 
@@ -189,21 +196,21 @@ namespace PiBike2
 
         private void InitCadenceSensor()
         {
-            m_pin_cadence_sensor = m_gpio.OpenPin(CADENCE_SENSOR_PIN);
+            m_cadence_sensor = m_gpio.OpenPin(CADENCE_SENSOR_PIN);
 
 
-            if (m_pin_cadence_sensor.IsDriveModeSupported(GpioPinDriveMode.InputPullUp))
-            {
+            if (m_cadence_sensor.IsDriveModeSupported(GpioPinDriveMode.InputPullUp))
+            { 
                 //change this if you get rid of the external pull up
-                m_pin_cadence_sensor.SetDriveMode(GpioPinDriveMode.Input);
+                m_cadence_sensor.SetDriveMode(GpioPinDriveMode.Input);
             }
             else
             {
-                m_pin_cadence_sensor.SetDriveMode(GpioPinDriveMode.Input);
+                m_cadence_sensor.SetDriveMode(GpioPinDriveMode.Input);
             }
 
-            m_pin_cadence_sensor.DebounceTimeout = TimeSpan.FromMilliseconds(BUTTON_DEBOUNCE);
-            m_pin_cadence_sensor.ValueChanged += M_pin_cadence_sensor_ValueChanged;
+            m_cadence_sensor.DebounceTimeout = TimeSpan.FromMilliseconds(BUTTON_DEBOUNCE);
+            m_cadence_sensor.ValueChanged += M_cadence_sensor_ValueChanged;
 
         }
 
@@ -231,7 +238,7 @@ namespace PiBike2
             }
             else
             {
-                spi_timer = new Timer(this.TimerCallback, null, 0, 10);
+                spi_timer = new Timer(this.MotorControlCallback, null, 0, 100);
             }
 
         }

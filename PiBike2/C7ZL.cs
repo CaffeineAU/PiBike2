@@ -49,15 +49,43 @@ namespace PiBike2
             {
                 if (value < 0)
                 {
-                    throw new Exception("Difficulty too low");
+                    //throw new Exception("Difficulty too low");
                 }
-                else if (value > 100)
+                else if (value > MAX_LEVEL)
                 {
-                    throw new Exception("Difficulty too high");
+                    //throw new Exception("Difficulty too high");
                 }
                 else
                 {
                     m_difficulty_setpoint = value;
+                }
+            }
+        }
+
+        public enum OnOff { On, Off};
+
+        public OnOff iFitLED
+        {
+            get
+            {
+                if(m_ifit_led.Read() == GpioPinValue.High)
+                {
+                    return OnOff.On;
+                }
+                else
+                {
+                    return OnOff.Off;
+                }
+            }
+            set
+            {
+                if(value == OnOff.On)
+                {
+                    m_ifit_led.Write(GpioPinValue.High);
+                }
+                else
+                {
+                    m_ifit_led.Write(GpioPinValue.Low);
                 }
             }
         }

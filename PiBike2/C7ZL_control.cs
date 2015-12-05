@@ -14,8 +14,18 @@ namespace PiBike2
 
         Timer spi_timer;
 
+        Timer dial_poll_timer;
+
+
+        
+
         private const int ADC_MAX = 8192;
+        private const int ADC_LIMIT_GUARDBAND = 100;
+
+
         private const decimal DEAD_HALFBAND = 200; //in adc
+
+        private const int MAX_LEVEL = 10;
 
         public string control_state = string.Empty;
 
@@ -29,46 +39,10 @@ namespace PiBike2
         }
 
 
-        private int[] buff = new int[5];
+        
 
-        private void TimerCallback(object state)
+        private void MotorControlCallback(object state)
         {
-
-
-            int val = toInt(m_pin_wheel_1.Read()) + (toInt(m_pin_wheel_2.Read()) * 2);
-
-            if(buff[4] != val)
-            {
-                buff[0] = buff[1];
-                buff[1] = buff[2];
-                buff[2] = buff[3];
-                buff[3] = buff[4];
-                buff[4] = val;
-
-                if(buff[0] == 3 &&
-                    buff[1] == 1 &&
-                    buff[2] == 0 &&
-                    buff[3] == 2 &&
-                    buff[4] == 3)
-                {
-                    Debug.WriteLine("Left");
-                }
-                else if(buff[0] == 3 &&
-                    buff[1] == 2 &&
-                    buff[2] == 0 &&
-                    buff[3] == 1 &&
-                    buff[4] == 3)
-                {
-                    Debug.WriteLine("Right");
-                }
-
-            }
-
-            //Debug.WriteLine("{0},{1},{2},{3},{4}", buff[0], buff[1], buff[2], buff[3], buff[4]);
-
-
-
-
             //read from the SPI device
             spi_adc.Read(ReadBuf);
 
@@ -76,7 +50,11 @@ namespace PiBike2
 
             int raw_adc = ((ReadBuf[0] & 0x1F) << 8) + ReadBuf[1];
 
-            int target_adc = Difficulty * ADC_MAX / 10;
+            int target_adc = (Difficulty * ADC_MAX) / MAX_LEVEL;
+
+            //we don't want to go right up to the very end to protect the gears
+            target_adc = Math.Min(target_adc, ADC_MAX - ADC_LIMIT_GUARDBAND);
+            target_adc = Math.Max(target_adc, 0 + ADC_LIMIT_GUARDBAND);
 
 
             control_state = string.Format("target = {0}\nactual = {1}", target_adc, raw_adc);
@@ -113,27 +91,22 @@ namespace PiBike2
             switch (state)
             {
                 case MotorState.Loosen:
-                        m_pin_motor3A.Write(GpioPinValue.High);
-                        m_pin_motor4A.Write(GpioPinValue.Low);
-                        m_pin_motor34EN.Write(GpioPinValue.High);
+                    m_motor3A.Write(GpioPinValue.High);
+                    m_motor4A.Write(GpioPinValue.Low);
+                    m_motor34EN.Write(GpioPinValue.High);
 
-                        m_pin_red_led.Write(GpioPinValue.Low);
                     break;
                 case MotorState.Tighten:
-                        m_pin_motor3A.Write(GpioPinValue.Low);
-                        m_pin_motor4A.Write(GpioPinValue.High);
-                        m_pin_motor34EN.Write(GpioPinValue.High);
+                    m_motor3A.Write(GpioPinValue.Low);
+                    m_motor4A.Write(GpioPinValue.High);
+                    m_motor34EN.Write(GpioPinValue.High);
 
-                        m_pin_red_led.Write(GpioPinValue.High);
-                        m_pin_blue_led.Write(GpioPinValue.Low);
                     break;
                 default:
-                    m_pin_motor3A.Write(GpioPinValue.Low);
-                    m_pin_motor4A.Write(GpioPinValue.Low);
-                    m_pin_motor34EN.Write(GpioPinValue.Low);
+                    m_motor3A.Write(GpioPinValue.Low);
+                    m_motor4A.Write(GpioPinValue.Low);
+                    m_motor34EN.Write(GpioPinValue.Low);
 
-                    m_pin_red_led.Write(GpioPinValue.High);
-                    m_pin_blue_led.Write(GpioPinValue.High);
                     break;
             }
 
