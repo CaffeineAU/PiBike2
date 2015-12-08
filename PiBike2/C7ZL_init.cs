@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -62,7 +63,51 @@ namespace PiBike2
         private const int BUTTON_DEBOUNCE = 100;
 
         
+       /* private void TestInputs()
+        {
 
+            int[] channels = new int []{ 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 ,27};
+
+            for(int i = 0; i < channels.Length; i++)
+            {
+
+                int io = channels[i];
+
+                try {
+
+                    
+                    GpioPin tmp = m_gpio.OpenPin(io);
+
+
+                    Debug.WriteLine("{0} Up [{1}], Down[{2}]", io, tmp.IsDriveModeSupported(GpioPinDriveMode.InputPullUp), tmp.IsDriveModeSupported(GpioPinDriveMode.InputPullDown));
+
+                    if (tmp.IsDriveModeSupported(GpioPinDriveMode.InputPullUp))
+                    {
+                        tmp.SetDriveMode(GpioPinDriveMode.InputPullUp);
+
+
+                        Debug.WriteLine(string.Format("{0} InputPullup {1}", io, tmp.Read()));
+                    }
+
+
+                    if (tmp.IsDriveModeSupported(GpioPinDriveMode.InputPullDown))
+                    {
+                        tmp.SetDriveMode(GpioPinDriveMode.InputPullDown);
+
+                        Debug.WriteLine(string.Format("{0} InputPullDown {1}", io, tmp.Read()));
+                    }
+
+                    tmp.Dispose();
+
+                }
+                catch(Exception e)
+                {
+                    Debug.WriteLine("{0} {1}", io, e.Message);
+                }
+
+            }
+
+        }*/
 
         private void InitGPIO()
         {
@@ -201,16 +246,19 @@ namespace PiBike2
 
             if (m_cadence_sensor.IsDriveModeSupported(GpioPinDriveMode.InputPullUp))
             { 
-                //change this if you get rid of the external pull up
-                m_cadence_sensor.SetDriveMode(GpioPinDriveMode.Input);
+                
+                m_cadence_sensor.SetDriveMode(GpioPinDriveMode.InputPullUp);
             }
             else
             {
                 m_cadence_sensor.SetDriveMode(GpioPinDriveMode.Input);
             }
 
-            m_cadence_sensor.DebounceTimeout = TimeSpan.FromMilliseconds(BUTTON_DEBOUNCE);
+            m_cadence_sensor.DebounceTimeout = TimeSpan.FromMilliseconds(50);
             m_cadence_sensor.ValueChanged += M_cadence_sensor_ValueChanged;
+
+            RPM = 0;
+
 
         }
 

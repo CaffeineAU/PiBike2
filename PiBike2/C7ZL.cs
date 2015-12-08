@@ -28,7 +28,15 @@ namespace PiBike2
         public int RPM
         {
             get { return m_RPM; }
-            private set { m_RPM = value; }
+            private set
+            {
+                m_RPM = value;
+
+                if (RpmChanged != null)
+                {
+                    RpmChanged(this, null);
+                }
+            }
         }
 
         private int m_heart_rate;
@@ -36,7 +44,11 @@ namespace PiBike2
         public int HeartRate
         {
             get { return m_heart_rate; }
-            private set { m_heart_rate = value; }
+            private set {
+                m_heart_rate = value;
+
+                
+            }
         }
 
 

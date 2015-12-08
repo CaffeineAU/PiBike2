@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Devices.Gpio;
 
@@ -26,6 +27,20 @@ namespace PiBike2
         private DateTime m_last_hr = DateTime.Now;
         private DateTime m_last_cadence = DateTime.Now;
 
+
+        private Queue<DateTime> m_cadence_blips = new Queue<DateTime>();
+
+        private Timer cadence_timeout;
+
+
+        private void ClearRPM()
+        {
+            this.RPM = 0;
+
+            m_cadence_blips.Clear();
+
+            Debug.WriteLine("Clear RPM");
+        }
 
         private void M_wheel_3_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs args)
         {
@@ -95,6 +110,8 @@ namespace PiBike2
         {
             if (args.Edge == GpioPinEdge.RisingEdge)
             {
+                Debug.WriteLine("{0} Heart beat", DateTime.Now);
+
                 TimeSpan hr_interval = DateTime.Now - m_last_hr;
 
                 m_last_hr = DateTime.Now;
@@ -115,25 +132,52 @@ namespace PiBike2
         {
             if (args.Edge == GpioPinEdge.RisingEdge)
             {
-                TimeSpan cadence_interval = DateTime.Now - m_last_cadence;
+                Debug.WriteLine("{0} Pedal Sensor", DateTime.Now);
 
-                m_last_cadence = DateTime.Now;
+                //TimeSpan cadence_interval = DateTime.Now - m_last_cadence;
 
-                RPM = (int)Math.Floor(60 / cadence_interval.TotalSeconds);
+                //m_last_cadence = DateTime.Now;
 
-                if (RpmChanged != null)
+
+                m_cadence_blips.Enqueue(DateTime.Now);
+
+                if(m_cadence_blips.Count > 5)
                 {
-                    RpmChanged(this, null);
+                    m_cadence_blips.Dequeue();
                 }
+
+                if (m_cadence_blips.Count > 2)
+                {
+
+                    double cadence_interval = (m_cadence_blips.Last() - m_cadence_blips.First()).TotalSeconds / m_cadence_blips.Count;
+
+                    Debug.WriteLine("Interval = {0} (count = {1})", cadence_interval, m_cadence_blips.Count);
+
+
+                    RPM = (int)Math.Floor(30 / cadence_interval); //its 60 divided by 2 due to the 2 magnets
+                }
+
+
+               
             }
         }
 
 
         private int[] buff = new int[5];
 
+        private TimeSpan rpm_timeout = new TimeSpan(0, 0, 5);
+
         private void DialPollCallback(object state)
         {
             //Debug.WriteLine("CheckDial");
+
+            if (m_cadence_blips.Count > 0)
+            {
+                if (DateTime.Now - m_cadence_blips.Last() > rpm_timeout)
+                {
+                    ClearRPM();
+                }
+            }
 
             int val = toInt(m_wheel_1.Read()) + (toInt(m_wheel_2.Read()) * 2);
 
