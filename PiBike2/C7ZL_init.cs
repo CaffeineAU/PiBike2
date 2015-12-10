@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.Gpio;
+using Windows.Devices.I2c;
 using Windows.Devices.Spi;
 
 namespace PiBike2
@@ -145,6 +146,7 @@ namespace PiBike2
 
             InitADC();
 
+            InitI2C();
             
 
         }
@@ -289,6 +291,102 @@ namespace PiBike2
                 spi_timer = new Timer(this.MotorControlCallback, null, 0, 100);
             }
 
+        }
+
+        private I2cDevice i2cPwmController;
+
+        private byte PCA9685_MODE1 = 0x00; // location for Mode1 register address
+        private byte PCA9685_MODE2 = 0x01; // location for Mode2 reigster address
+        private byte PCA9685_LED0 = 0x06; // location for start of LED0 registers
+
+        private byte PCA9685_I2C_BASE_ADDRESS = 0x40; //b1000 000 - note this is 7 bit
+
+        private byte _i2cAddress;
+
+        private async void InitI2C()
+        {
+            try
+            {
+
+                _i2cAddress = (byte)(PCA9685_I2C_BASE_ADDRESS | (0x00 & 0x3F));
+
+                var i2cSettings = new I2cConnectionSettings(_i2cAddress);
+                i2cSettings.BusSpeed = I2cBusSpeed.FastMode;
+
+                string deviceSelector = I2cDevice.GetDeviceSelector("I2C1");
+
+                var i2cDeviceControllers = await DeviceInformation.FindAllAsync(deviceSelector);
+
+                i2cPwmController = await I2cDevice.FromIdAsync(i2cDeviceControllers[0].Id, i2cSettings);
+
+
+                
+
+                //reset
+                i2cPwmController.Write(new byte[] { PCA9685_MODE1, (byte)0x01 });
+                await Task.Delay(10);
+
+                //check it can be read from
+
+                byte tmp = readRegister(PCA9685_MODE1);
+                bool isOnline = tmp == 0x01;
+
+                await Task.Delay(10);
+
+
+                //set to output
+                i2cPwmController.Write(new byte[] { PCA9685_MODE2, (byte)0x10 });
+
+                await Task.Delay(10);
+
+                writeLED(13, 0x10, 0x00, 0x10, 0x00);
+                await Task.Delay(10);
+                writeLED(14, 0x00, 0x00, 0x10, 0x00);
+                await Task.Delay(10);
+                writeLED(15, 0x10, 0x00, 0x10, 0x00);
+
+                int y = 0;
+
+            }
+            catch(Exception e)
+            {
+                Debug.WriteLine(e.Message);
+
+                int i = 0;
+            }
+
+
+
+        }
+
+
+        private byte readRegister(byte address)
+        {
+
+            byte[] ret = new byte[1];
+
+
+            i2cPwmController.WriteRead(new byte[] { address }, ret);
+
+            return ret[0];
+
+        }
+
+
+        private void writeLED(int led_num, byte LED_ON_HIGH_BYTE , byte LED_ON_LOW_BYTE, byte LED_OFF_HIGH_BYTE, byte LED_OFF_LOW_BYTE)
+        {
+
+            //I think the ratio of on byte to low byte give the PWM ratio
+            //so for on it would be 0b1000 and 0b0000 to give all on and none off
+
+
+            if(led_num >= 0 && led_num <= 15)
+            {
+                byte[] message = new byte[] { (byte)(PCA9685_LED0 + (4 * led_num)), LED_ON_HIGH_BYTE, LED_ON_LOW_BYTE, LED_OFF_HIGH_BYTE, LED_OFF_LOW_BYTE };
+
+                i2cPwmController.Write(message);
+
+            }
         }
 
         
