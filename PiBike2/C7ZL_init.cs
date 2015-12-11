@@ -146,7 +146,7 @@ namespace PiBike2
 
             InitADC();
 
-            InitI2C();
+            InitI2C(0x70);
             
 
         }
@@ -301,14 +301,20 @@ namespace PiBike2
 
         private byte PCA9685_I2C_BASE_ADDRESS = 0x40; //b1000 000 - note this is 7 bit
 
-        private byte _i2cAddress;
+        //private byte _i2cAddress;
 
-        private async void InitI2C()
+        private async void InitI2C(byte address)
         {
             try
             {
 
-                _i2cAddress = (byte)(PCA9685_I2C_BASE_ADDRESS | (0x00 & 0x3F));
+                //byte[] buf = new byte[3];
+                //buf[0] = (byte)(address << 1);
+                //buf[1] = PCA9685_MODE1;
+                //buf[2] = 0x21;
+
+
+                byte _i2cAddress = 0x40; //all zero.  fixed bit is bit 7
 
                 var i2cSettings = new I2cConnectionSettings(_i2cAddress);
                 i2cSettings.BusSpeed = I2cBusSpeed.FastMode;
@@ -320,32 +326,89 @@ namespace PiBike2
                 i2cPwmController = await I2cDevice.FromIdAsync(i2cDeviceControllers[0].Id, i2cSettings);
 
 
-                
+                i2cPwmController.Write(new byte[] { PCA9685_MODE1, 0x21 });
+
 
                 //reset
-                i2cPwmController.Write(new byte[] { PCA9685_MODE1, (byte)0x01 });
-                await Task.Delay(10);
+                //i2cPwmController.Write(new byte[] { (byte)0x01 });
+                //await Task.Delay(10);
 
                 //check it can be read from
 
-                byte tmp = readRegister(PCA9685_MODE1);
-                bool isOnline = tmp == 0x01;
+                /*byte mode1_reg = readRegister(PCA9685_MODE1);
+                Debug.WriteLine("Mode 1 = {0}", ToBinary(mode1_reg));
+                byte mode2_reg = readRegister(PCA9685_MODE2);
+                Debug.WriteLine("Mode 2 = {0}", ToBinary(mode2_reg));
 
-                await Task.Delay(10);
+
+                //reset
+                Debug.WriteLine("Perform Reset");
+                i2cPwmController.Write(new byte[] { PCA9685_MODE1, (byte)(mode1_reg | 0x80) });
+                mode1_reg = readRegister(PCA9685_MODE1);
+                Debug.WriteLine("Mode 1 = {0}", ToBinary(mode1_reg));
+
 
 
                 //set to output
-                i2cPwmController.Write(new byte[] { PCA9685_MODE2, (byte)0x10 });
+
+                Debug.WriteLine("Turn on output");
+                i2cPwmController.Write(new byte[] { PCA9685_MODE2, (byte)(mode2_reg | (byte)0x01) });
+                mode2_reg = readRegister(PCA9685_MODE2);
+                Debug.WriteLine("Mode 2 = {0}", ToBinary(mode2_reg));
+                */
 
                 await Task.Delay(10);
 
-                writeLED(13, 0x10, 0x00, 0x10, 0x00);
-                await Task.Delay(10);
-                writeLED(14, 0x00, 0x00, 0x10, 0x00);
-                await Task.Delay(10);
-                writeLED(15, 0x10, 0x00, 0x10, 0x00);
 
-                int y = 0;
+              
+
+                
+
+                await Task.Delay(10);
+
+
+                //13 = red
+                
+
+                //writeLED(14, 0x00, 0x00, 0x10, 0x00);
+                //await Task.Delay(10);
+                //writeLED(15, 0x10, 0x00, 0x10, 0x00);
+                for (int i = 13; i <= 15; i++)
+                {
+                    Debug.WriteLine("LED {0}", i);
+                    for (int j = 0; j < 4; j++)
+                    {
+                        byte addr = (byte)(PCA9685_LED0 + (4 * i) + j);
+                        
+                        Debug.WriteLine("{0} = {1}", addr, readRegister(addr));
+                    }
+                    
+
+                }
+                //int y = 0;  
+
+                List<Tuple<bool, bool, bool>> list = new List<Tuple<bool, bool, bool>>();
+                list.Add(new Tuple<bool, bool, bool>(false, false, false));
+                list.Add(new Tuple<bool, bool, bool>(false, false, true));
+                list.Add(new Tuple<bool, bool, bool>(false, true, false));
+                list.Add(new Tuple<bool, bool, bool>(false, true, true));
+                list.Add(new Tuple<bool, bool, bool>(true, false, false));
+                list.Add(new Tuple<bool, bool, bool>(true, false, true));
+                list.Add(new Tuple<bool, bool, bool>(true, true, false));
+                list.Add(new Tuple<bool, bool, bool>(true, true, true));
+
+                foreach(Tuple<bool,bool,bool> t in list)
+                {
+
+                    writeLED(13, t.Item1); //red, false = on, true = green on
+                    writeLED(14, t.Item2); // true -= blue on
+                    writeLED(15, t.Item3); //green or blue?
+
+                    Debug.WriteLine("Combination = {0}, {1}, {2}", t.Item1, t.Item2, t.Item3);
+                    
+
+                    await Task.Delay(2000);
+                }
 
             }
             catch(Exception e)
@@ -357,6 +420,11 @@ namespace PiBike2
 
 
 
+        }
+
+        private string ToBinary(byte b)
+        {
+            return Convert.ToString(b, 2);
         }
 
 
@@ -373,7 +441,7 @@ namespace PiBike2
         }
 
 
-        private void writeLED(int led_num, byte LED_ON_HIGH_BYTE , byte LED_ON_LOW_BYTE, byte LED_OFF_HIGH_BYTE, byte LED_OFF_LOW_BYTE)
+        private void writeLED(int led_num, bool state)
         {
 
             //I think the ratio of on byte to low byte give the PWM ratio
@@ -382,10 +450,25 @@ namespace PiBike2
 
             if(led_num >= 0 && led_num <= 15)
             {
-                byte[] message = new byte[] { (byte)(PCA9685_LED0 + (4 * led_num)), LED_ON_HIGH_BYTE, LED_ON_LOW_BYTE, LED_OFF_HIGH_BYTE, LED_OFF_LOW_BYTE };
 
-                i2cPwmController.Write(message);
+                byte base_addr = (byte)((PCA9685_LED0 + (4 * led_num)));
 
+                if (state)
+                {
+                    i2cPwmController.Write(new byte[] { base_addr, 0x00 });
+                    i2cPwmController.Write(new byte[] { (byte)(base_addr + 1), 0x00 });
+                    i2cPwmController.Write(new byte[] { (byte)(base_addr + 2), 0xFF });
+                    i2cPwmController.Write(new byte[] { (byte)(base_addr + 3), 0x0F });
+
+                }
+                else
+                {
+                    i2cPwmController.Write(new byte[] { base_addr, 0x00 });
+                    i2cPwmController.Write(new byte[] { (byte)(base_addr + 1), 0x00 });
+                    i2cPwmController.Write(new byte[] { (byte)(base_addr + 2), 0x00 });
+                    i2cPwmController.Write(new byte[] { (byte)(base_addr + 3), 0x00 });
+
+                }
             }
         }
 
