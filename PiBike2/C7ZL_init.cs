@@ -43,7 +43,7 @@ namespace PiBike2
         private GpioPin m_ifit_led = null;
         private GpioPin m_motor3A = null;
         private GpioPin m_motor4A = null;
-        private GpioPin m_motor34EN = null;
+        //private GpioPin m_motor34EN = null; //replaced by PWM controller
         
         //Digital Inputs
         private GpioPin m_wheel_1 = null;
@@ -59,6 +59,10 @@ namespace PiBike2
         //Analog Inputs
         //ADC - This uses SPI so do it last
         SpiDevice spi_adc = null;
+        PCA9685 pwm_controller = null;
+
+
+
         byte[] ReadBuf = new byte[2];
 
         private const int BUTTON_DEBOUNCE = 100;
@@ -153,7 +157,8 @@ namespace PiBike2
             string deviceSelector = I2cDevice.GetDeviceSelector("I2C1");
             var i2cDeviceControllers = await DeviceInformation.FindAllAsync(deviceSelector);
             I2cDevice device = await I2cDevice.FromIdAsync(i2cDeviceControllers[0].Id, i2cSettings);
-            PCA9685 pwm_controller = new PCA9685(device);
+
+            pwm_controller = new PCA9685(device);
 
             pwm_controller.AllOff();
 
@@ -203,11 +208,11 @@ namespace PiBike2
         {
             m_motor3A = m_gpio.OpenPin(MOTOR3A_PIN);
             m_motor4A = m_gpio.OpenPin(MOTOR4A_PIN);
-            m_motor34EN = m_gpio.OpenPin(MOTOR34EN_PIN);
+            //m_motor34EN = m_gpio.OpenPin(MOTOR34EN_PIN);
 
             if (m_motor3A == null ||
-                m_motor4A == null ||
-                m_motor34EN == null)
+                m_motor4A == null )
+                //m_motor34EN == null)
             {
                 throw new Exception("There were problems initializing the GPIO pins for the motor.");
             }
@@ -215,10 +220,10 @@ namespace PiBike2
 
             m_motor3A.Write(GpioPinValue.Low);
             m_motor4A.Write(GpioPinValue.Low);
-            m_motor34EN.Write(GpioPinValue.Low);
+            //m_motor34EN.Write(GpioPinValue.Low);
             m_motor3A.SetDriveMode(GpioPinDriveMode.Output);
             m_motor4A.SetDriveMode(GpioPinDriveMode.Output);
-            m_motor34EN.SetDriveMode(GpioPinDriveMode.Output);
+            //m_motor34EN.SetDriveMode(GpioPinDriveMode.Output);
 
         }
 

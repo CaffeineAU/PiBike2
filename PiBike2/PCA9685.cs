@@ -13,7 +13,7 @@ namespace PiBike2
     {
 
         private byte PCA9685_MODE1 = 0x00; // location for Mode1 register address
-        private byte PCA9685_MODE2 = 0x01; // location for Mode2 reigster address
+        //private byte PCA9685_MODE2 = 0x01; // location for Mode2 reigster address
         private byte PCA9685_LED0 = 0x06; // location for start of LED0 registers
 
 

@@ -56,21 +56,23 @@ namespace PiBike2
             target_adc = Math.Min(target_adc, ADC_MAX - ADC_LIMIT_GUARDBAND);
             target_adc = Math.Max(target_adc, 0 + ADC_LIMIT_GUARDBAND);
 
+            double percent = 1;
+
 
             control_state = string.Format("target = {0}\nactual = {1}", target_adc, raw_adc);
 
             //do the motor control
             if (raw_adc < (target_adc - DEAD_HALFBAND))
             {
-                SetMotor(MotorState.Tighten);
+                SetMotor(MotorState.Tighten, percent);
             }
             else if (raw_adc > (target_adc + DEAD_HALFBAND))
             {
-                SetMotor(MotorState.Loosen);
+                SetMotor(MotorState.Loosen, percent);
             }
             else
             {
-                SetMotor(MotorState.Off);
+                SetMotor(MotorState.Off,percent);
             }
 
         }
@@ -79,35 +81,46 @@ namespace PiBike2
 
         public MotorState motor_state = MotorState.Off;
 
-        private void SetMotor(MotorState state)
+        private void SetMotor(MotorState state, double percent)
         {
 
-            motor_state = state;
-
-            //the motor controller is a simple on off right now.
-            //future work will be to make the enable a PWM signal with a p-controller
-            //add an extra method parameter 'speed'
-
-            switch (state)
+            if(percent < 0 || percent > 1)
             {
-                case MotorState.Loosen:
-                    m_motor3A.Write(GpioPinValue.High);
-                    m_motor4A.Write(GpioPinValue.Low);
-                    m_motor34EN.Write(GpioPinValue.High);
+                throw new Exception("Percent out of range");
+            }
 
-                    break;
-                case MotorState.Tighten:
-                    m_motor3A.Write(GpioPinValue.Low);
-                    m_motor4A.Write(GpioPinValue.High);
-                    m_motor34EN.Write(GpioPinValue.High);
+            if (pwm_controller != null)
+            {
 
-                    break;
-                default:
-                    m_motor3A.Write(GpioPinValue.Low);
-                    m_motor4A.Write(GpioPinValue.Low);
-                    m_motor34EN.Write(GpioPinValue.Low);
+                motor_state = state;
 
-                    break;
+
+
+                //the motor controller is a simple on off right now.
+                //future work will be to make the enable a PWM signal with a p-controller
+                //add an extra method parameter 'speed'
+
+                switch (state)
+                {
+                    case MotorState.Loosen:
+                        m_motor3A.Write(GpioPinValue.High);
+                        m_motor4A.Write(GpioPinValue.Low);
+                        pwm_controller.SetPWM(7, percent);
+
+                        break;
+                    case MotorState.Tighten:
+                        m_motor3A.Write(GpioPinValue.Low);
+                        m_motor4A.Write(GpioPinValue.High);
+                        pwm_controller.SetPWM(7, percent);
+
+                        break;
+                    default:
+                        m_motor3A.Write(GpioPinValue.Low);
+                        m_motor4A.Write(GpioPinValue.Low);
+                        pwm_controller.SetPWM(7, 0);
+
+                        break;
+                }
             }
 
         }
